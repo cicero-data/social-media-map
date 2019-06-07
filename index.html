@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Add a vector tile source</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
+<style>
+body { margin:0; padding:0; }
+#map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
+</head>
+<body>
+ 
+<div id='map'></div>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoibHVrZW1ja2luc3RyeSIsImEiOiJjajU0ODRsNmMwMHg2MndxeWsxMXhpY3k5In0.yM_-IJxaryqd9i5Rt6k8LA';
+var map = new mapboxgl.Map({
+container: 'map',
+style: 'mapbox://styles/mapbox/dark-v10',
+zoom: 4,
+center: [-74.50, 40]
+});
+ 
+map.on('load', function () {
+ 
+map.addLayer({
+"id": "terrain-data",
+"type": "circle",
+"source": {
+type: 'vector',
+url: 'mapbox://lukemckinstry.abrm3q5g'
+},
+"source-layer": "count_dispersed_2019_06_07",
+"paint": 
+{'circle-radius': {
+'base': 10.75,
+'stops': [[4,2],[10, 10], [22, 180]]
+},'circle-color': [
+'match',
+['get', 'cato'],
+'t', '#ff9633', //orange
+'f', '#33ffda', //green
+'b', '#9c33ff', //purple
+'n', '#daff33', //yellow
+/* other */ '#ccc'
+]
+}
+});
+});
+</script>
+ 
+</body>
+</html>

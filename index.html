@@ -2,10 +2,10 @@
 <html>
 <head>
 <meta charset='utf-8' />
-<title>Elected Officials Social Media </title>
+<title>Show and hide layers</title>
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.0/mapbox-gl.css' rel='stylesheet' />
 <style>
 body { margin:0; padding:0; }
 #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -13,7 +13,53 @@ body { margin:0; padding:0; }
 </head>
 <body>
  
-<div id='map'></div>
+<style>
+#menu {
+background: #fff;
+position: absolute;
+z-index: 1;
+top: 10px;
+right: 10px;
+border-radius: 3px;
+width: 120px;
+border: 1px solid rgba(0,0,0,0.4);
+font-family: 'Open Sans', sans-serif;
+}
+ 
+#menu a {
+font-size: 13px;
+color: #404040;
+display: block;
+margin: 0;
+padding: 0;
+padding: 10px;
+text-decoration: none;
+border-bottom: 1px solid rgba(0,0,0,0.25);
+text-align: center;
+}
+ 
+#menu a:last-child {
+border: none;
+}
+ 
+#menu a:hover {
+background-color: #f8f8f8;
+color: #404040;
+}
+ 
+#menu a.active {
+background-color: #3887be;
+color: #ffffff;
+}
+ 
+#menu a.active:hover {
+background: #3074a4;
+}
+</style>
+ 
+<nav id="menu"></nav>
+<div id="map"></div>
+ 
 <script>
 mapboxgl.accessToken = 'pk.eyJ1IjoibHVrZW1ja2luc3RyeSIsImEiOiJjajU0ODRsNmMwMHg2MndxeWsxMXhpY3k5In0.yM_-IJxaryqd9i5Rt6k8LA';
 var map = new mapboxgl.Map({
@@ -24,17 +70,20 @@ center: [-97, 38]
 });
  
 map.on('load', function () {
- 
-map.addLayer({
-"id": "terrain-data",
-"type": "circle",
-"source": {
+
+
+map.addSource('national', {
 type: 'vector',
-url: 'mapbox://lukemckinstry.abrm3q5g'
+url: 'mapbox://lukemckinstry.a038tics'
+});
+map.addLayer({
+'id': 'national',
+'type': 'circle',
+'source': 'national',
+'layout': {
+'visibility': 'visible'
 },
-"source-layer": "count_dispersed_2019_06_07",
-"paint": 
-{'circle-radius': {
+'paint': {'circle-radius': {
 'base': 10.75,
 'stops': [[4,2],[10, 10], [22, 180]]
 },'circle-color': [
@@ -46,9 +95,213 @@ url: 'mapbox://lukemckinstry.abrm3q5g'
 'n', '#daff33', //yellow
 /* other */ '#ccc'
 ]
+},
+
+'source-layer': 'count_dispersed_national_2019_06_07'
+});
+
+
+map.addSource('state', {
+type: 'vector',
+url: 'mapbox://lukemckinstry.aru94fsj'
+});
+map.addLayer({
+"id": "state",
+"type": "circle",
+'source': 'state',
+'layout': {
+'visibility': 'visible'
+},
+'paint': {'circle-radius': {
+'base': 10.75,
+'stops': [[4,2],[10, 10], [22, 180]]
+},'circle-color': [
+'match',
+['get', 'cato'],
+'t', '#ff9633', //orange
+'f', '#33ffda', //green
+'b', '#9c33ff', //purple
+'n', '#daff33', //yellow
+/* other */ '#ccc'
+]
+},
+
+"source-layer": "count_dispersed_state_2019_06_07"
+});
+
+
+
+map.addSource('local', {
+type: 'vector',
+url: 'mapbox://lukemckinstry.ccd5rpr6'
+});
+map.addLayer({
+"id": "local",
+"type": "circle",
+'source': 'local',
+'layout': {
+'visibility': 'visible'
+},
+'paint': {'circle-radius': {
+'base': 10.75,
+'stops': [[4,2],[10, 10], [22, 180]]
+},'circle-color': [
+'match',
+['get', 'cato'],
+'t', '#ff9633', //orange
+'f', '#33ffda', //green
+'b', '#9c33ff', //purple
+'n', '#daff33', //yellow
+/* other */ '#ccc'
+]
+},
+
+"source-layer": "count_dispersed_local_2019_06_07"
+});
+
+
+});
+ 
+var toggleableLayerIds = [ 'national', 'state', 'local' ];
+ 
+for (var i = 0; i < toggleableLayerIds.length; i++) {
+var id = toggleableLayerIds[i];
+ 
+var link = document.createElement('a');
+link.href = '#';
+link.className = 'active';
+link.textContent = id;
+ 
+link.onclick = function (e) {
+var clickedLayer = this.textContent;
+e.preventDefault();
+e.stopPropagation();
+ 
+var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+ 
+if (visibility === 'visible') {
+map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+this.className = '';
+} else {
+this.className = 'active';
+map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
 }
+};
+ 
+var layers = document.getElementById('menu');
+layers.appendChild(link);
+}
+
+
+// Create a popup, but don't add it to the map yet.
+var local_popup = new mapboxgl.Popup({
+closeButton: false,
+closeOnClick: false
 });
+ 
+map.on('mouseenter', 'local', function(e) {
+// Change the cursor style as a UI indicator.
+map.getCanvas().style.cursor = 'pointer';
+ 
+
+ console.log(e)
+var coordinates = e.features[0].geometry.coordinates.slice();
+var description = e.features[0].properties.first_name +' '+ e.features[0].properties.last_name +'<br>' +
+			e.features[0].properties.name_formal + ' (' + e.features[0].properties.district_id + ')';
+ 
+// Ensure that if the map is zoomed out such that multiple
+// copies of the feature are visible, the popup appears
+// over the copy being pointed to.
+while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+}
+ 
+// Populate the popup and set its coordinates
+// based on the feature found.
+local_popup.setLngLat(coordinates)
+.setHTML(description)
+.addTo(map);
 });
+ 
+map.on('mouseleave', 'local', function() {
+map.getCanvas().style.cursor = '';
+local_popup.remove();
+});
+ 
+
+
+// Create a popup, but don't add it to the map yet.
+var state_popup = new mapboxgl.Popup({
+closeButton: false,
+closeOnClick: false
+});
+ 
+map.on('mouseenter', 'state', function(e) {
+// Change the cursor style as a UI indicator.
+map.getCanvas().style.cursor = 'pointer';
+ 
+
+ console.log(e)
+var coordinates = e.features[0].geometry.coordinates.slice();
+var description = e.features[0].properties.first_name +' '+ e.features[0].properties.last_name +'<br>' +
+			e.features[0].properties.name_formal + ' (' + e.features[0].properties.district_id + ')';
+ 
+// Ensure that if the map is zoomed out such that multiple
+// copies of the feature are visible, the popup appears
+// over the copy being pointed to.
+while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+}
+ 
+// Populate the popup and set its coordinates
+// based on the feature found.
+state_popup.setLngLat(coordinates)
+.setHTML(description)
+.addTo(map);
+});
+ 
+map.on('mouseleave', 'state', function() {
+map.getCanvas().style.cursor = '';
+state_popup.remove();
+});
+
+
+// Create a popup, but don't add it to the map yet.
+var national_popup = new mapboxgl.Popup({
+closeButton: false,
+closeOnClick: false
+});
+ 
+map.on('mouseenter', 'national', function(e) {
+// Change the cursor style as a UI indicator.
+map.getCanvas().style.cursor = 'pointer';
+ 
+
+ console.log(e)
+var coordinates = e.features[0].geometry.coordinates.slice();
+var description = e.features[0].properties.first_name +' '+ e.features[0].properties.last_name +'<br>' +
+			e.features[0].properties.name_formal + ' (' + e.features[0].properties.district_id + ')';
+ 
+// Ensure that if the map is zoomed out such that multiple
+// copies of the feature are visible, the popup appears
+// over the copy being pointed to.
+while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+}
+ 
+// Populate the popup and set its coordinates
+// based on the feature found.
+national_popup.setLngLat(coordinates)
+.setHTML(description)
+.addTo(map);
+});
+ 
+map.on('mouseleave', 'national', function() {
+map.getCanvas().style.cursor = '';
+national_popup.remove();
+});
+
+
 </script>
  
 </body>
